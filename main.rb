@@ -71,6 +71,10 @@ rescue
 	abort "endpoint.cfg not found: put the Slack Webhook URL in endpoint.cfg"
 end
 
+def sleep2(s)
+	sleep 60 * ((s/60)/2).ceil
+end
+
 last = ""
 wtime = 15*60
 notified = true
@@ -98,12 +102,12 @@ while true do
 	if starts_in < wtime and not notified then
 		notify upcoming, starts_in
 		notified = true
-		sleep (starts_in/2).ceil
+		sleep2 starts_in
 	else
 		if starts_in > wtime then
-			sleep ((starts_in - wtime)/2).ceil
+			sleep2 starts_in - wtime
 		else
-			sleep (starts_in/2).ceil
+			sleep2 starts_in
 		end
 	end
 end
