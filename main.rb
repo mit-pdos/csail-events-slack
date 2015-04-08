@@ -17,22 +17,23 @@ def notify(e, starts_in)
 			.strip
 			.gsub(/\s+/, " ")
 			.gsub(/\s,/, ",")
+			.encode("UTF-8")
 	end
 
 	update = {
-		:text => sprintf("The following talk starts in %d minutes in %s", starts_in/60, e.location),
+		:text => sprintf("The following talk starts in %d minutes in %s", starts_in/60, info["Location"]),
 		:channel => "#seminars",
 		:username => "seminar-bot",
 		:icon_emoji => ":ear:",
 		:attachments => [
 			{
 				:author_name => info["Speaker"],
-				:title => e.summary,
-				:text => e.description,
+				:title => e.summary.force_encoding("UTF-8"),
+				:text => e.description.force_encoding("UTF-8"),
 				:fields => [
 					{
 						:title => "Room",
-						:value => e.location,
+						:value => info["Location"],
 						:short => true
 					},
 					{
