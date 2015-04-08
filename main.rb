@@ -81,7 +81,7 @@ def sleep2(s)
 end
 
 last = ""
-wtime = 15*60
+wtimem = 15
 notified = true
 while true do
 	events = URI('https://calendar.csail.mit.edu/event_calendar.ics')
@@ -106,15 +106,15 @@ while true do
 	printf("==> next event starts in %d minutes\n", (starts_in/60).floor)
 	STDOUT.flush
 
-	if starts_in < wtime and not notified then
+	if starts_in < 60*(wtimem+1) and not notified then
 		puts "==> event about to start, notifying Slack channel"
 		notify upcoming, starts_in
 		puts "==> Slack channel notified\n"
 		notified = true
 		puts "==> waiting for event to start"
 		sleep starts_in+1
-	elsif starts_in > wtime then
-		sleep2 starts_in - wtime
+	elsif starts_in > 60*wtimem then
+		sleep2 starts_in - 60*wtimem
 	else
 		# sleep until after the event has started
 		sleep starts_in+1
