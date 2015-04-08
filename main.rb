@@ -65,6 +65,7 @@ end
 
 begin
 	$endpoint = File.open "endpoint.cfg", &:readline
+	$endpoint.chomp!
 rescue
 	abort "endpoint.cfg not found: put the Slack Webhook URL in endpoint.cfg"
 end
