@@ -97,12 +97,12 @@ while true do
 	if starts_in < wtime and not notified then
 		notify upcoming, starts_in
 		notified = true
-		sleep starts_in
+		sleep (starts_in/2).ceil
 	else
 		if starts_in > wtime then
-			sleep starts_in - wtime
+			sleep ((starts_in - wtime)/2).ceil
 		else
-			sleep starts_in
+			sleep (starts_in/2).ceil
 		end
 	end
 end
