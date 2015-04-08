@@ -71,6 +71,7 @@ rescue
 end
 
 last = ""
+wtime = 15*60
 notified = true
 while true do
 	events = URI('https://calendar.csail.mit.edu/event_calendar.ics')
@@ -92,9 +93,15 @@ while true do
 
 	printf("next event: %s starts in %d minutes\n", upcoming.summary, starts_in/60)
 
-	if starts_in < 15*60 and not notified then
+	if starts_in < wtime and not notified then
 		notify upcoming, starts_in
 		notified = true
+		sleep starts_in
+	else
+		if starts_in > wtime then
+			sleep starts_in - wtime
+		else
+			sleep starts_in
+		end
 	end
-	sleep 60
 end
