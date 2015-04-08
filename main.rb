@@ -93,6 +93,7 @@ while true do
 	end
 
 	printf("next event: %s starts in %d minutes\n", upcoming.summary, starts_in/60)
+	STDOUT.flush
 
 	if starts_in < wtime and not notified then
 		notify upcoming, starts_in
