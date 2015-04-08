@@ -63,6 +63,7 @@ def notify(e, starts_in)
 	end
 
 	puts "  -> sending notification payload to Slack"
+	STDOUT.flush
 
 	uri = URI($endpoint)
 	res = Net::HTTP.post_form(uri, 'payload' => JSON.generate(update))
@@ -103,20 +104,23 @@ while true do
 		notified = false
 	end
 
-	printf("==> next event starts in %d minutes\n", (starts_in/60).floor)
-	STDOUT.flush
-
 	if starts_in < 60*(wtimem+1) and not notified then
 		puts "==> event about to start, notifying Slack channel"
+		STDOUT.flush
+
 		notify upcoming, starts_in
-		puts "==> Slack channel notified\n"
 		notified = true
-		puts "==> waiting for event to start"
-		sleep starts_in+1
+
+		puts "==> Slack channel notified\n"
+		STDOUT.flush
 	elsif starts_in > 60*wtimem then
+		printf("==> next event starts in %d minutes\n", (starts_in/60).floor)
+		STDOUT.flush
+
 		sleep2 starts_in - 60*wtimem
 	else
-		# sleep until after the event has started
+		puts "==> waiting for event to start"
+		STDOUT.flush
 		sleep starts_in+1
 	end
 end
