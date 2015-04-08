@@ -85,11 +85,8 @@ while true do
 			notified = false
 		end
 		# dtstart is initialized as a local time, when it is really a Boston time
-		start = upcoming.dtstart.value.to_time - Time.now.gmt_offset
-		now = Time.now
-		puts start
-		puts now
-		starts_in = start - now
+		start = upcoming.dtstart.value.to_time - Time.now.getlocal('-04:00').gmt_offset
+		starts_in = start - Time.now
 	end
 
 	printf("next event: %s starts in %d minutes\n", upcoming.summary, starts_in/60)
