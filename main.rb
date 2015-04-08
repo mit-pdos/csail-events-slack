@@ -80,13 +80,14 @@ while true do
 	starts_in = -1
 	while starts_in < 0 do
 		upcoming = cal.first.events.shift
-		if last != upcoming.summary then
-			last = upcoming.summary
-			notified = false
-		end
 		# dtstart is initialized as a local time, when it is really a Boston time
 		start = upcoming.dtstart.value.to_time - Time.now.getlocal('-04:00').gmt_offset
 		starts_in = start - Time.now
+	end
+
+	if last != upcoming.summary then
+		last = upcoming.summary
+		notified = false
 	end
 
 	printf("next event: %s starts in %d minutes\n", upcoming.summary, starts_in/60)
