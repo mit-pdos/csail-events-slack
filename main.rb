@@ -5,10 +5,13 @@ require 'json'
 $endpoint = ""
 
 def notify(e, starts_in)
+	puts "  -> finding event url in event calendar"
 	events = URI('https://calendar.csail.mit.edu/event_calendar')
 	lines = Net::HTTP.get(events).split("\n").select { |line| line.include? e.summary }
 	# we'll get two hits, a div and the link
 	href = URI.join(events, /href="([^"]*)"/.match(lines[1])[1])
+	puts "  -> url is #{href}"
+	puts "  -> retrieving detailed event information"
 	rinfo = Net::HTTP.get(href).scan(/<p>\s*<strong>(.*?):?<\/strong>(.*?)<\/p>/m)
 	info = {}
 	rinfo.each do |i|
@@ -59,6 +62,8 @@ def notify(e, starts_in)
 		update[:attachments][:title_link] = info["Relevant URL"]
 	end
 
+	puts "  -> sending notification payload to Slack"
+
 	uri = URI($endpoint)
 	res = Net::HTTP.post_form(uri, 'payload' => JSON.generate(update))
 	puts res.body
@@ -92,22 +97,26 @@ while true do
 	end
 
 	if last != upcoming.summary then
+		puts ":: next event is at #{upcoming.dtstart}"
+		puts ":: #{upcoming.summary.strip}"
 		last = upcoming.summary
 		notified = false
 	end
 
-	printf("next event: %s starts in %d minutes\n", upcoming.summary, starts_in/60)
+	printf("==> next event starts in %d minutes\n", (starts_in/60).floor)
 	STDOUT.flush
 
 	if starts_in < wtime and not notified then
+		puts "==> event about to start, notifying Slack channel"
 		notify upcoming, starts_in
+		puts "==> Slack channel notified\n"
 		notified = true
-		sleep2 starts_in
+		puts "==> waiting for event to start"
+		sleep starts_in+1
+	elsif starts_in > wtime then
+		sleep2 starts_in - wtime
 	else
-		if starts_in > wtime then
-			sleep2 starts_in - wtime
-		else
-			sleep2 starts_in
-		end
+		# sleep until after the event has started
+		sleep starts_in+1
 	end
 end
