@@ -31,8 +31,8 @@ def notify(e, starts_in)
 		:attachments => [
 			{
 				:author_name => info["Speaker"],
-				:title => e.summary.force_encoding("UTF-8"),
-				:text => e.description.force_encoding("UTF-8"),
+				:title => e.summary.strip.force_encoding("UTF-8"),
+				:text => e.description.strip.force_encoding("UTF-8"),
 				:fields => [
 					{
 						:title => "Room",
