@@ -76,12 +76,16 @@ while true do
 	response = Net::HTTP.get(events)
 
 	cal = Icalendar.parse(response)
-	upcoming = cal.first.events.first
-	if last != upcoming.summary then
-		last = upcoming.summary
-		notified = false
+	starts_in = -1
+	while starts_in < 0 do
+		upcoming = cal.first.events.shift
+		if last != upcoming.summary then
+			last = upcoming.summary
+			notified = false
+		end
+		start = upcoming.dtstart.value.to_time - upcoming.dtstart.value.to_time.gmt_offset
+		starts_in = start - Time.now
 	end
-	starts_in = upcoming.dtstart.value.to_time - Time.now
 
 	printf("next event: %s starts in %d minutes\n", upcoming.summary, starts_in/60)
 
