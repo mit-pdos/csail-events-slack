@@ -25,7 +25,6 @@ def notify(e, starts_in)
 
 	update = {
 		:text => sprintf("The following talk starts in %d minutes in %s", starts_in/60, info["Location"]),
-		:channel => "#seminars",
 		:username => "seminar-bot",
 		:icon_emoji => ":ear:",
 		:attachments => [
