@@ -87,7 +87,17 @@ while true do
 	events = URI('https://calendar.csail.mit.edu/event_calendar.ics')
 	response = Net::HTTP.get(events)
 
-	cal = Icalendar.parse(response)
+	begin
+		cal = Icalendar.parse(response)
+	rescue
+		puts "!! failed to parse event calendar; dumped to parse-failed.ical"
+		File.open "parse-failed.ical", 'w' do |f|
+			f.write(response)
+		end
+		sleep 60
+		next
+	end
+
 	starts_in = -1
 	while starts_in < 0 do
 		upcoming = cal.first.events.shift
