@@ -1,13 +1,14 @@
 require 'icalendar'
 require 'net/http'
 require 'json'
+require 'cgi'
 
 $endpoint = ""
 
 def notify(e, starts_in)
 	puts "  -> finding event url in event calendar"
 	events = URI('https://calendar.csail.mit.edu/event_calendar')
-	lines = Net::HTTP.get(events).split("\n").select { |line| line.include? e.summary }
+	lines = Net::HTTP.get(events).split("\n").select { |line| line.include? CGI.escapeHTML(e.summary) }
 	# we'll get two hits, a div and the link
 	href = URI.join(events, /href="([^"]*)"/.match(lines[1])[1])
 	puts "  -> url is #{href}"
@@ -15,12 +16,12 @@ def notify(e, starts_in)
 	rinfo = Net::HTTP.get(href).scan(/<p>\s*<strong>(.*?):?<\/strong>(.*?)<\/p>/m)
 	info = {}
 	rinfo.each do |i|
-		info[i[0]] = i[1]
+		info[i[0]] = CGI.unescapeHTML(i[1]
 			.gsub(/<br( \/)?>/, "\n")
 			.strip
 			.gsub(/\s+/, " ")
 			.gsub(/\s,/, ",")
-			.encode("UTF-8")
+			.encode("UTF-8"))
 	end
 
 	update = {
