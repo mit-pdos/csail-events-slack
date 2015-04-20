@@ -59,7 +59,7 @@ def notify(e, starts_in)
 		]
 	}
 	if info["Relevant URL"] != "" then
-		update[:attachments][:title_link] = info["Relevant URL"]
+		update[:attachments][0][:title_link] = info["Relevant URL"]
 	end
 
 	puts "  -> sending notification payload to Slack"
