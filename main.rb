@@ -10,7 +10,18 @@ def notify(e, starts_in)
 	events = URI('https://calendar.csail.mit.edu/event_calendar')
 	lines = Net::HTTP.get(events).split("\n").select { |line| line.include? CGI.escapeHTML(e.summary) }
 	# we'll get two hits, a div and the link
-	href = URI.join(events, /href="([^"]*)"/.match(lines[1])[1])
+	if lines.length != 2
+		puts "!! failed to parse event calendar page"
+		puts "lines:", lines
+	end
+	href = /href="([^"]*)"/.match(lines[1])
+	if href.nil? || href.length < 2
+		puts "!! failed to parse event calendar page"
+		puts "lines:", lines
+		puts "match:", href
+		return
+	end
+	href = URI.join(events, href[1])
 	puts "  -> url is #{href}"
 	puts "  -> retrieving detailed event information"
 	rinfo = Net::HTTP.get(href).scan(/<p>\s*<strong>(.*?):?<\/strong>(.*?)<\/p>/m)
