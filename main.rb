@@ -5,6 +5,22 @@ require 'cgi'
 
 $endpoint = ""
 
+def slackify(text, root)
+	CGI.unescapeHTML(
+		text
+		.gsub(/<br( \/)?>/, "\n")
+		.gsub(/\n\n+/, "<br />")
+		.gsub(/\n/, " ")
+		.gsub(/<br \/>/, "\n\n")
+		.gsub(/<i>([^<]*)<\/i>/, "*\\1*")
+		.gsub(/<a [^>]*href="([^"]+)"[^>]*>([^<]+)<\/a>/) {|m| "<#{URI.join(root, $1)}|#{$2}>"}
+		.strip
+		.gsub(/ +/, " ")
+		.gsub(/\s,/, ",")
+		.encode("UTF-8")
+	)
+end
+
 def notify(e, starts_in)
 	puts "  -> finding event url in event calendar"
 	events = URI('https://calendar.csail.mit.edu/event_calendar')
@@ -29,12 +45,7 @@ def notify(e, starts_in)
 	rinfo = Net::HTTP.get(href).scan(/<p>\s*<strong>(.*?):?<\/strong>(.*?)<\/p>/m)
 	info = {}
 	rinfo.each do |i|
-		info[i[0]] = CGI.unescapeHTML(i[1]
-			.gsub(/<br( \/)?>/, "\n")
-			.strip
-			.gsub(/\s+/, " ")
-			.gsub(/\s,/, ",")
-			.encode("UTF-8"))
+		info[i[0]] = slackify(i[1], events)
 	end
 
 	update = {
@@ -44,8 +55,8 @@ def notify(e, starts_in)
 		:attachments => [
 			{
 				:author_name => info["Speaker"],
-				:title => e.summary.strip.force_encoding("UTF-8"),
-				:text => e.description.strip.force_encoding("UTF-8"),
+				:title => slackify(e.summary.force_encoding("UTF-8"), events),
+				:text => slackify(e.description.force_encoding("UTF-8"), events),
 				:fields => [
 					{
 						:title => "Room",
