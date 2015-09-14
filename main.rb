@@ -123,6 +123,12 @@ while true do
 		next
 	end
 
+	if cal.first.nil? then
+		puts ":: no upcoming events; sleeping for a day"
+		sleep 24*60*60
+		next
+	end
+
 	starts_in = -1
 	while starts_in < 0 do
 		upcoming = cal.first.events.shift
