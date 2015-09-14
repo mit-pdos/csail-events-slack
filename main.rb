@@ -119,7 +119,7 @@ while true do
 		File.open "parse-failed.ical", 'w' do |f|
 			f.write(response)
 		end
-		sleep 60
+		sleep 60*60
 		next
 	end
 
