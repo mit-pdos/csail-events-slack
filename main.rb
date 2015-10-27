@@ -25,7 +25,7 @@ def fetch(url, request_max = 5)
 	case res
 	when Net::HTTPOK
 		$ref = ""
-		return res.body
+		return res.body.force_encoding("UTF-8")
 	when Net::HTTPFound, Net::HTTPMovedPermanently
 		begin
 			$cookie = res.fetch "Set-Cookie"
@@ -35,7 +35,7 @@ def fetch(url, request_max = 5)
 		return fetch(res.fetch('location'), request_max - 1)
 	else
 		$ref = ""
-		raise res.body
+		return res.body.force_encoding("UTF-8")
 	end
 end
 
@@ -51,7 +51,6 @@ def slackify(text, root)
 		.strip
 		.gsub(/ +/, " ")
 		.gsub(/\s,/, ",")
-		.encode("UTF-8")
 	)
 end
 
@@ -79,7 +78,7 @@ def notify(e, starts_in)
 	href = URI.join(events, href[1])
 	puts "  -> url is #{href}"
 	puts "  -> retrieving detailed event information"
-	rinfo = Net::HTTP.get(href).scan(/<p>\s*<strong>(.*?):?<\/strong>(.*?)<\/p>/m)
+	rinfo = fetch(href).scan(/<p>\s*<strong>(.*?):?<\/strong>(.*?)<\/p>/m)
 	info = {}
 	rinfo.each do |i|
 		info[i[0]] = slackify(i[1], events)
