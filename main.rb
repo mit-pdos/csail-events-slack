@@ -5,6 +5,40 @@ require 'cgi'
 
 $endpoint = ""
 
+$cookie = ""
+$ref = ""
+def fetch(url, request_max = 5)
+	raise "Max number of redirects reached" if request_max <= 0
+
+	uri = URI(url)
+
+	http = Net::HTTP.new(uri.host, uri.port)
+	http.use_ssl = uri.port != 80
+
+	options = {}
+	options["Cookie"] = $cookie if $cookie != ""
+	options["Referer"] = $ref if $ref != ""
+
+	req = Net::HTTP::Get.new(sprintf("%s?%s", uri.path, uri.query), options)
+	res = http.request req
+
+	case res
+	when Net::HTTPOK
+		$ref = ""
+		return res.body
+	when Net::HTTPFound, Net::HTTPMovedPermanently
+		begin
+			$cookie = res.fetch "Set-Cookie"
+		rescue
+		end
+		$ref = url
+		return fetch(res.fetch('location'), request_max - 1)
+	else
+		$ref = ""
+		raise res.body
+	end
+end
+
 def slackify(text, root)
 	CGI.unescapeHTML(
 		text
@@ -23,8 +57,11 @@ end
 
 def notify(e, starts_in)
 	puts "  -> finding event url in event calendar"
-	events = URI('https://calendar.csail.mit.edu/event_calendar')
-	lines = Net::HTTP.get(events).split("\n").select { |line| line.include? CGI.escapeHTML(e.summary) }
+
+	events = 'https://calendar.csail.mit.edu/event_calendar'
+	#events = 'https://peeps-test.csail.mit.edu:8443/event_calendar'
+
+	lines = fetch(events).split("\n").select { |line| line.include? CGI.escapeHTML(e.summary) }
 	# we'll get two hits, a div and the link
 	if lines.length != 2
 		puts "!! failed to parse event calendar page"
@@ -109,8 +146,8 @@ last = ""
 wtimem = 15
 notified = true
 while true do
-	events = URI('https://calendar.csail.mit.edu/event_calendar.ics')
-	response = Net::HTTP.get(events)
+	response = fetch('https://calendar.csail.mit.edu/event_calendar.ics')
+	#response = fetch('https://peeps-test.csail.mit.edu:8443/event_calendar.ics')
 
 	begin
 		cal = Icalendar.parse(response)
