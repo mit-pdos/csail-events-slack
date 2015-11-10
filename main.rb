@@ -64,7 +64,7 @@ def notify(e, starts_in)
 	# we'll get two hits, a div and the link
 	if lines.length != 2
 		puts "!! failed to parse event calendar page"
-		puts "looked for #{CGI.escapeHTML(e.summary)} in \n#{Net::HTTP.get(events)}"
+		puts "looked for #{CGI.escapeHTML(e.summary)} in \n#{fetch(events)}"
 		puts "gave:", lines
 		return
 	end
