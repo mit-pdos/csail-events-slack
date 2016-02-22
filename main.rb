@@ -1,5 +1,8 @@
+#!/usr/bin/env ruby
+
 require 'icalendar'
 require 'net/http'
+require 'tzinfo'
 require 'json'
 require 'cgi'
 
@@ -169,8 +172,9 @@ while true do
 	while starts_in < 0 do
 		upcoming = cal.first.events.shift
 		# dtstart is initialized as a local time, when it is really a Boston time
-		start = upcoming.dtstart.value.to_time - Time.now.getlocal('-04:00').gmt_offset
-		starts_in = start - Time.now
+		here = TZInfo::Timezone.get(upcoming.dtstart.ical_params['tzid'][0])
+		start = upcoming.dtstart.to_time
+		starts_in = start - here.now
 	end
 
 	if last != upcoming.summary then
